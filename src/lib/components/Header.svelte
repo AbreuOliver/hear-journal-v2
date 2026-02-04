@@ -80,7 +80,7 @@
     </button>
 
     <!-- Title -->
-    <h1 class="font-manrope text-[1.35rem] font-semibold text-[var(--color-primary-green)] select-none cursor-default">
+    <h1 class="font-manrope text-[1.35rem] font-bold text-[var(--color-primary-green)] select-none cursor-default">
       <span class="tracking-normal">HEAR</span> Journal
     </h1>
 
@@ -92,7 +92,10 @@
          <!-- <svg xmlns="http://www.w3.org/2000/svg" class="text-neutral-400" width="24" height="24" viewBox="0 0 24 24">
           <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0a5 5 0 0 1 1-3a1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4" />
         </svg> -->
-        <svg xmlns="http://www.w3.org/2000/svg" class="text-neutral-400"  width="24" height="24" viewBox="0 0 24 24">
+          <svg xmlns="http://www.w3.org/2000/svg" class="text-neutral-400 p-0.25 -mr-1" width="24" height="24" viewBox="0 0 24 24">
+          <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="2" d="m12.667 10.5l1.25-7.5L6 13h5l-1.25 7.5l7.917-10z" clip-rule="evenodd" />
+        </svg>
+        <!-- <svg xmlns="http://www.w3.org/2000/svg" class="text-neutral-400"  width="24" height="24" viewBox="0 0 24 24">
           <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
             <path stroke-dasharray="60" d="M12 3c4.97 0 9 4.03 9 9c0 4.97 -4.03 9 -9 9c-4.97 0 -9 -4.03 -9 -9c0 -4.97 4.03 -9 9 -9">
               <animate fill="freeze" attributeName="stroke-dashoffset" dur="0.6s" values="60;0" />
@@ -109,7 +112,7 @@
               <animate fill="freeze" attributeName="stroke-dashoffset" begin="1s" dur="0.2s" to="0" />
             </path>
           </g>
-        </svg>
+        </svg> -->
         <span class="text-neutral-400 font-manrope tracking-wide text-lg font-medium">{streakCount}</span>
       </div>
 

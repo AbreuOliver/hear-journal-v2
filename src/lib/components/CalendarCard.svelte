@@ -141,14 +141,14 @@
 {#if cardExpanded}
   <div
     id={cardPanelId}
-    class="w-screen -mx-4 -mt-4 p-6 border-b-2 border-neutral-200/25 bg-lime-500/10"
+    class="w-screen -mx-4 -mt-4 px-6 py-8 border-b-2 border-neutral-200/25 bg-neutral-200/10"
     transition:slide={{ duration: 300 }}
   >
     <!-- =====================
          Week Context + Nav
     ====================== -->
     <div class="flex w-full items-center mb-2">
-      <h2 class="pl-1 text-[13px] uppercase font-inter font-medium text-[var(--color-text-secondary)]">
+      <h2 class="pl-1 text-xs uppercase font-inter font-medium text-[var(--color-text-secondary)]">
         Viewing<br />
 
         {#if isCurrentWeek}

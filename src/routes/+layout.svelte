@@ -1,36 +1,38 @@
 <script lang="ts">
+  /* ----------------------------- Global styles ---------------------------- */
   import "../app.css";
   import favicon from "$lib/assets/HEAR-Journal.ico";
+
+  /* ----------------------------- Components ------------------------------- */
   import Header from "$lib/components/Header.svelte";
   import Splash from "$lib/components/SplashScreen.svelte";
 
-  import { browser } from "$app/environment";
+  /* ------------------------------ Svelte ---------------------------------- */
   import { onMount } from "svelte";
-  import { parseUserAgent } from "$lib/utils/userAgentParser";
-  import { registerSW } from "virtual:pwa-register";
-  import {
-    isInstalledAsPWA /*, getDisplayMode*/,
-  } from "$lib/utils/pwaModeDetect";
+  import { browser } from "$app/environment";
 
-  // UI state
-  let showSplash = false; // default: no splash in browsers
+  /* ------------------------------ Utils ----------------------------------- */
+  import { parseUserAgent } from "$lib/utils/userAgentParser";
+  import { isInstalledAsPWA } from "$lib/utils/pwaModeDetect";
+  import { registerSW } from "virtual:pwa-register";
+
+  /* ----------------------------- UI state --------------------------------- */
+  let showSplash = false;
   let isPWA = false;
   let uaDisplay = "";
 
-  // Run client-only to avoid SSR mismatches
+  /* -------------------------- Client-only setup --------------------------- */
   onMount(() => {
     if (!browser) return;
 
     uaDisplay = parseUserAgent(window.navigator.userAgent);
-
     isPWA = isInstalledAsPWA();
-    showSplash = isPWA; // show splash only when running as an installed PWA
 
-    // Optional: log display mode for diagnostics
-    // console.debug("PWA:", isPWA, "mode:", getDisplayMode());
+    // Only show splash when installed as PWA
+    showSplash = isPWA;
   });
 
-  // Service worker
+  /* -------------------------- Service Worker ------------------------------ */
   const updateSW = registerSW({
     immediate: true,
     onNeedRefresh() {
@@ -43,7 +45,7 @@
     },
   });
 
-  // Splash completion
+  /* --------------------------- Event handlers ----------------------------- */
   function handleSplashDone() {
     showSplash = false;
   }
@@ -53,29 +55,16 @@
   <link rel="icon" href={favicon} />
 </svelte:head>
 
-<Header />
-<div class="min-h-screen flex flex-col overflow-x-hidden">
-  {#if showSplash}
-    <Splash onDone={handleSplashDone} />
-  {/if}
+<div class="max-w-md mx-auto">
+  <Header />
 
-  <main class="flex-1 max-w-[70ch] mx-auto px-4 sm:px-0 w-full py-4">
-    <slot />
-  </main>
-  <div
-    class="h-4 w-full bg-amber-500 relative overflow-hidden"
-    role="alert"
-    aria-label="Warning indicator"
-  >
-    <div
-      class="absolute inset-0 opacity-80"
-      style="background-image: repeating-linear-gradient(-45deg, transparent, transparent 10px, rgba(0,0,0,0.3) 10px, rgba(0,0,0,0.3) 20px);"
-    ></div>
+  <div class="flex flex-col overflow-x-hidden">
+    {#if showSplash}
+      <Splash onDone={handleSplashDone} />
+    {/if}
+
+    <div class="flex-1 w-full mx-auto px-4 sm:px-0">
+      <slot />
+    </div>
   </div>
-  <footer
-    class="flex items-center justify-center text-center min-h-12 font-medium leading-tight px-3 py-6 bg-amber-400 font-mono"
-  >
-    <span class="sr-only">Current browser and device information:</span>
-    User Agent Info: {uaDisplay}
-  </footer>
 </div>

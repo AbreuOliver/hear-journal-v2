@@ -2,6 +2,15 @@
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
 
+/* GASCOGNE SERIAL REGULAR */
+@font-face {
+  font-family: "app-";
+  src: url("/fonts/sweet-sans.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --color-text-primary: hsl(0, 0%, 13%);
   --color-text-secondary: hsl(0, 0%, 29%);
@@ -17,6 +26,7 @@
 
 .font-inter {
   font-family: "Inter", sans-serif;
+  font-family: "app-sans", sans-serif;
 }
 
 .text-primary {

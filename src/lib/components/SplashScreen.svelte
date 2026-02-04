@@ -37,7 +37,7 @@
 
 {#if visible}
   <div
-    class="fixed inset-0 flex items-center justify-center bg-[var(--color-text-primary)] text-white z-50 text-center transition-all duration-500 ease-out"
+    class="fixed min-h-screen inset-0 flex items-center justify-center bg-[var(--color-text-primary)] text-white z-50 text-center transition-all duration-500 ease-out"
     class:animate-out={animateOut}
   >
     <h1 class="mx-auto w-full font-manrope text-5xl font-bold tracking-tight">

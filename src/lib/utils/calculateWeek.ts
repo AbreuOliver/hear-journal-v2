@@ -5,52 +5,38 @@
  * @returns THE WEEK NUMBER AS A 1-BASED INTEGER
  */
 export function getWeekOfYear(date: Date = new Date(), weekStartDay: number = 0): number {
-  // COPY THE DATE TO AVOID MUTATING THE ORIGINAL
   const target = new Date(date.getTime());
-
-  // SET HOURS TO ZERO TO IGNORE TIME PART
   target.setHours(0, 0, 0, 0);
 
-  // GET THE DAY OF THE WEEK FOR THE GIVEN DATE (0 = SUN, 1 = MON, ..., 6 = SAT)
   const dayOfWeek = target.getDay();
-
-  // CALCULATE THE OFFSET FROM THE WEEK START DAY
-  // THIS SHIFTS THE DATE BACK TO THE START OF THE WEEK ACCORDING TO weekStartDay
   const dayOffset = (dayOfWeek < weekStartDay) 
     ? 7 - (weekStartDay - dayOfWeek)
     : dayOfWeek - weekStartDay;
 
-  // MOVE THE DATE BACK TO THE START OF THE WEEK
   target.setDate(target.getDate() - dayOffset);
 
-  // GET THE FIRST DAY OF THE YEAR
   const yearStart = new Date(target.getFullYear(), 0, 1);
   yearStart.setHours(0, 0, 0, 0);
 
-  // GET THE DAY OF THE WEEK FOR THE YEAR START
   const yearStartDayOfWeek = yearStart.getDay();
-
-  // CALCULATE OFFSET FROM weekStartDay TO ADJUST YEAR START TO THE FIRST WEEK START
   const yearStartOffset = (yearStartDayOfWeek < weekStartDay)
     ? 7 - (weekStartDay - yearStartDayOfWeek)
     : yearStartDayOfWeek - weekStartDay;
 
-  // ADJUST THE YEAR START DATE BACK TO THE FIRST START OF WEEK IN THE YEAR
   yearStart.setDate(yearStart.getDate() - yearStartOffset);
 
-  // CALCULATE THE NUMBER OF WEEKS (MILLISECONDS DIVIDED BY MILLISECONDS IN A WEEK)
-  // ADD 1 TO MAKE IT 1-BASED
-   const oneWeekMs = 7 * 24 * 60 * 60 * 1000;
+  const oneWeekMs = 7 * 24 * 60 * 60 * 1000;
   const diff = target.getTime() - yearStart.getTime();
-  let weekNumber = Math.floor(diff / oneWeekMs) + 2;
+  let weekNumber = Math.floor(diff / oneWeekMs) + 1; // ✅ Fixed: was + 2
 
-  // Wrap around so anything above 52 becomes 1
   if (weekNumber > 52) {
-    weekNumber = ((weekNumber - 1) % 53) + 1;
+    weekNumber = ((weekNumber - 1) % 52) + 1;
   }
 
   return weekNumber;
 }
+
+// getWeekRange remains the same
 
 /**
  * GET THE START AND END DATES OF THE WEEK FOR A GIVEN DATE AND WEEK START DAY

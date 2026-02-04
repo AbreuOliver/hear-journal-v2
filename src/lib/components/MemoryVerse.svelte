@@ -79,13 +79,19 @@
   $: verseText = memoryVersesData.verseText;
 </script>
 
-<SectionCard padding="lg">
-  <h2
+<!-- <SectionCard padding="lg"> -->
+ <SectionCard padding="none">
+  <div class="flex flex-col items-start justify-start px-6 pt-6 pb-4">
+    <h2
+      class="pl-1 text-[13px] uppercase font-inter font-medium mb-0 text-[var(--color-text-muted)]"
+    >
+  <!-- <h2
     class="pl-1 text-[13px] uppercase font-inter font-medium mb-1 text-[var(--color-text-muted)]"
-  >
+  > -->
     Memory Verse
   </h2>
-
+  </div>
+  <div class="px-6 pb-6 flex flex-col">
   <p class="font-manrope text-2xl grow-1 font-semibold text-white">
     {Array.isArray(memoryVerseDisplay)
       ? memoryVerseDisplay.join(", ")
@@ -118,4 +124,5 @@
       {revealed ? "Hide Verse" : "Show Verse"}
     </p>
   </button>
+  </div>
 </SectionCard>

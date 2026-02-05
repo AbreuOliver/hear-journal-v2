@@ -98,7 +98,7 @@
       : memoryVerseDisplay}
   </p>
 
-  <div class="min-h-10 pt-7 pb-8 relative">
+  <div class="min-h-10 py-6 relative">
     <p
       class="font-manrope text-lg/6 pl-0.5 text-[var(--color-text-muted)] transition-filter duration-300 whitespace-pre-line"
       class:blur-sm={!revealed}
@@ -110,7 +110,7 @@
 
   <button
     on:click={toggleReveal}
-    class="flex items-center py-0.5 px-3 rounded-2xl min-h-9 cursor-pointer bg-[var(--color-primary-green)] mt-2 ml-auto"
+    class="flex items-center py-1 px-4 rounded-full min-h-9 cursor-pointer bg-[var(--color-primary-green)] mt-2 ml-auto"
     aria-pressed={revealed}
   >
     <div class="flex items-center mt-0.5">

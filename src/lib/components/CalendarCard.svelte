@@ -55,7 +55,7 @@
 </script>
 
 <!-- Calendar Card Header -->
-<div class="w-screen px-6 -mx-4 border-y-[2px] border-neutral-200/25 flex items-center justify-center py-2.5">
+<div class="w-screen px-6 -mx-4 border-y-2 border-neutral-200/25  hover:bg-neutral-100 hover:rounded-full transition-colors flex items-center justify-center py-2.5">
   <button
     class="flex items-center w-full cursor-pointer focus:outline-none"
     on:click={toggleCardExpanded}

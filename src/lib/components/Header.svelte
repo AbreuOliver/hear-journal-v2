@@ -190,7 +190,7 @@
       <!-- Header row -->
       <div class="flex items-center justify-between mb-6">
         <div class="flex items-center gap-4">
-          <h2 class="text-xl font-semibold font-manrope text-[var(--color-primary-green)]">
+          <h2 class="text-xl font-semibold font-manrope text-(--color-primary-green)">
             My Rhythm
           </h2>
           <div class="h-9 w-9 rounded-full bg-neutral-400 flex items-center justify-center overflow-hidden">
@@ -268,14 +268,14 @@
   {:else}
     <div
       transition:fly={{ y: -16, duration: 360, opacity: 0, easing: elasticOut }}
-      class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[70]
+      class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-70
              w-[92vw] max-w-md rounded-3xl shadow-2xl
              bg-[#1e1e1e] backdrop-blur-xl text-white p-6"
     >
       <!-- Header row -->
       <div class="flex items-center justify-between mb-6">
         <div class="flex items-center gap-4">
-          <h2 class="text-xl font-semibold font-manrope text-[var(--color-primary-green)]">
+          <h2 class="text-xl font-semibold font-manrope text-(--color-primary-green)">
             My Rhythm
           </h2>
           <div class="h-9 w-9 rounded-full bg-neutral-400 flex items-center justify-center overflow-hidden">

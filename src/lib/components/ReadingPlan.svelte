@@ -136,7 +136,7 @@
         <span class:text-[var(--color-primary-green)]={completionPercent === 1}>
           {completionPercent * 100}%
         </span>
-        &nbsp;Read
+       
       </p>
 
       <!-- Animated circular progress -->
@@ -183,7 +183,7 @@
     </p>
   </div>
   <div
-    class="w-full flex items-center justify-center bg-[var(--color-text-secondary)] h-[2px] my-6"
+    class="w-full flex items-center justify-center bg-(--color-text-secondary) h-0.5 my-6"
   ></div>
   <div class="min-h-10 flex-col justify-start text-left px-4 space-y-4 pb-6">
     {#if groupedPassages.length}
@@ -198,7 +198,7 @@
             </span>
           </div>
           <p
-            class="font-manrope text-lg leading-7 text-[var(--color-text-muted)] flex-1 pl-2"
+            class="font-app-sans text-lg leading-7 text-(--color-text-muted) flex-1 pl-2"
           >
             <!-- {#each passages as passage, i}
               {passage}
@@ -213,8 +213,8 @@
                 href={toBibleLink(passage)}
                 target="_blank"
                 rel="noopener noreferrer"
-                class="inline-flex items-center gap-1 hover:underline hover:text-[var(--color-primary-green)]
-             focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary-green)]
+                class="inline-flex items-center gap-1 hover:underline hover:text-[var(--color-primary-green)
+             focus:outline-none focus-visible:ring-2 focus-visible:ring-(--color-primary-green)]
              rounded-sm transition-colors"
                 aria-label={`Open ${passage} on bible.com (opens in new tab)`}
                 title={`Open ${passage} on bible.com`}

@@ -68,6 +68,8 @@
   function handleSplashDone() {
     showSplash = false;
   }
+
+  let currentYear: number = new Date().getFullYear();
 </script>
 
 <svelte:head>
@@ -88,4 +90,12 @@
       <slot />
     </div>
   </div>
+  <footer class="text-center text-sm text-black/70 py-6 px-4 bg-neutral-200">
+    <p class="text-black/90 font-manrope font-semibold">HEAR Journal &copy; {currentYear}</p>
+    <hr class="mb-4 mt-3 border-t border-neutral-300 text-serif" />
+    <p class="px-4">HEAR Journal is an independent companion app for the HEAR Journaling method.
+      HEAR Journaling is a teaching framework developed by Replicate Ministries.
+      This tool is not affiliated with, endorsed by, or officially connected to Replicate Ministries.
+    </p>
+  </footer>
 </div>

@@ -16,6 +16,9 @@
   import { isInstalledAsPWA } from "$lib/utils/pwaModeDetect";
   import { registerSW } from "virtual:pwa-register";
 
+  // ✅ add this import
+  import { recordAppOpenOncePerDay } from "$lib/utils/engagement";
+
   /* ----------------------------- UI state --------------------------------- */
   let showSplash = false;
   let isPWA = false;
@@ -25,11 +28,27 @@
   onMount(() => {
     if (!browser) return;
 
+    // ✅ count unique day open on initial mount
+    recordAppOpenOncePerDay();
+
+    // ✅ optional: count again when returning to the app (background -> foreground)
+    const onVis = () => {
+      if (document.visibilityState === "visible") {
+        recordAppOpenOncePerDay();
+      }
+    };
+    document.addEventListener("visibilitychange", onVis);
+
     uaDisplay = parseUserAgent(window.navigator.userAgent);
     isPWA = isInstalledAsPWA();
 
     // Only show splash when installed as PWA
     showSplash = isPWA;
+
+    // cleanup
+    return () => {
+      document.removeEventListener("visibilitychange", onVis);
+    };
   });
 
   /* -------------------------- Service Worker ------------------------------ */
@@ -55,15 +74,17 @@
   <link rel="icon" href={favicon} />
 </svelte:head>
 
-<div class="max-w-md mx-auto overflow-x-hidden">
-  <Header />
+<div class="max-w-md mx-auto">
+  <div class="sticky top-0 z-50 bg-white">
+    <Header />
+  </div>
 
-  <div class="flex flex-col overflow-x-hidden">
+  <div class="flex flex-col">
     {#if showSplash}
       <Splash onDone={handleSplashDone} />
     {/if}
 
-    <div class="flex-1 w-full mx-auto sm:px-0">
+    <div class="flex-1 w-full mx-auto sm:px-0 overflow-x-hidden">
       <slot />
     </div>
   </div>

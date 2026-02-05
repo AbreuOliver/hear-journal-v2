@@ -9,11 +9,11 @@ export type EngagementState = {
 const STORAGE_KEY = 'hear_engagement_v1';
 
 function readFromStorage(): EngagementState {
-  if (!browser) return { totalOpenDays: 1, lastOpenDate: null };
+  if (!browser) return { totalOpenDays: 0, lastOpenDate: null };
 
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { totalOpenDays: 1, lastOpenDate: null };
+    if (!raw) return { totalOpenDays: 0, lastOpenDate: null };
 
     const parsed = JSON.parse(raw) as Partial<EngagementState>;
 
@@ -29,9 +29,10 @@ function readFromStorage(): EngagementState {
 
     return { totalOpenDays, lastOpenDate };
   } catch {
-    return { totalOpenDays: 1, lastOpenDate: null };
+    return { totalOpenDays: 0, lastOpenDate: null };
   }
 }
+
 
 function writeToStorage(state: EngagementState) {
   if (!browser) return;

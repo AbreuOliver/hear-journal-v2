@@ -55,7 +55,7 @@
   <link rel="icon" href={favicon} />
 </svelte:head>
 
-<div class="max-w-md mx-auto">
+<div class="max-w-md mx-auto overflow-x-hidden">
   <Header />
 
   <div class="flex flex-col overflow-x-hidden">

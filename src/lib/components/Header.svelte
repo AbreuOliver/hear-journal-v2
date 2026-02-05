@@ -151,20 +151,20 @@
 </header>
 
 {#if engagementModalOpen}
-  <!-- Backdrop -->
   <button
     transition:fade={{ duration: 160 }}
     class="fixed inset-0 z-[60] bg-black/55 backdrop-blur-[4px]"
+    style="will-change: opacity;"
     on:click={toggleEngagementModal}
     aria-label="Close rhythm modal"
   ></button>
 
-  <!-- Modal -->
   <div
     transition:fly={{ y: -16, duration: 360, opacity: 0, easing: elasticOut }}
+    style="will-change: transform, opacity;"
     class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[70]
            w-[92vw] max-w-md rounded-3xl shadow-2xl
-           bg-[#1e1e1e] backdrop-blur-xl text-white p-6"
+           bg-[#1e1e1e] text-white p-6"
   >
     <!-- Header row -->
     <div class="flex items-center justify-between mb-6">

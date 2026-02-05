@@ -1,5 +1,5 @@
 import { get } from 'svelte/store';
-import { engagement, type EngagementState } from '$lib/stores/engament.store'
+import { engagement, type EngagementState } from '$lib/stores/engagement.store'
 
 function localDayKey(d = new Date()): string {
   // Local date as YYYY-MM-DD

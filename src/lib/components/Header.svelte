@@ -80,7 +80,7 @@
     </button>
 
     <!-- Title -->
-    <h1 class="font-manrope text-[1.35rem] font-bold text-[var(--color-primary-green)] select-none cursor-default">
+    <h1 class="font-manrope text-[1.35rem] ml-1.5 font-bold text-[var(--color-primary-green)] select-none cursor-default">
       <span class="tracking-normal">HEAR</span> Journal
     </h1>
 

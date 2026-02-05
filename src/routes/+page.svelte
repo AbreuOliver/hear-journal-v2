@@ -5,7 +5,7 @@
     import AdditionalReading from "$lib/components/AdditionalReading.svelte";
 </script>
 
-<main class="space-y-4 overflow-x-hidden pb-8">
+<main class="space-y-4 overflow-x-hidden pb-8 px-4">
   <CalendarCard />
   <MemoryVerse />
   <ReadingPlan />

@@ -63,7 +63,7 @@
       <Splash onDone={handleSplashDone} />
     {/if}
 
-    <div class="flex-1 w-full mx-auto px-4 sm:px-0">
+    <div class="flex-1 w-full mx-auto sm:px-0">
       <slot />
     </div>
   </div>

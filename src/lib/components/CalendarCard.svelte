@@ -64,13 +64,13 @@
     aria-controls={cardPanelId}
   >
     <div class="flex items-center text-black/60 text-md text-left mr-6 py-2 gap-2">
-      <Calendar size={24} className="pt-0 mr-2 text-[currentColor]" />
+      <Calendar size={24} className="pt-0 mr-1 text-[currentColor]" />
       <p class="font-manrope font-medium">
         Week {$weekData.currentWeek} • {$weekData.weekRangeString}
       </p>
     </div>
 
-    <Chevron up={cardExpanded} size={16} className="text-zinc-500 mt-1 mr-auto " />
+    <Chevron up={cardExpanded} size={16} className="text-zinc-500 mt-1 mr-auto" />
   </button>
 </div>
 

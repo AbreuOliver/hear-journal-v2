@@ -152,16 +152,18 @@
 
 {#if engagementModalOpen}
   <button
-    transition:fade={{ duration: 160 }}
+    in:fade={{ duration: 160 }}
+    out:fade={{ duration: 120 }}
     class="fixed inset-0 z-[60] bg-black/55 backdrop-blur-[4px]"
-    style="will-change: opacity;"
+    style="transform: translateZ(0); -webkit-transform: translateZ(0);"
     on:click={toggleEngagementModal}
     aria-label="Close rhythm modal"
   ></button>
 
   <div
-    transition:fly={{ y: -16, duration: 360, opacity: 0, easing: elasticOut }}
-    style="will-change: transform, opacity;"
+    in:fly={{ y: -16, duration: 360, opacity: 0, easing: elasticOut }}
+    out:fly={{ y: -16, duration: 240, opacity: 0 }}
+    style="transform: translateZ(0); -webkit-transform: translateZ(0);"
     class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[70]
            w-[92vw] max-w-md rounded-3xl shadow-2xl
            bg-[#1e1e1e] text-white p-6"

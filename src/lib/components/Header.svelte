@@ -12,30 +12,17 @@
     // ✅ plan days completed (as you already have it)
     $: planDaysCompleted = $engagementMetrics.totalDaysCompleted;
 
-    let menuOpen = false;
     let engagementModalOpen = false;
 
     // iOS detection (Safari + iOS PWA)
     let isIOS = false;
 
-    function toggleMenu() {
-        menuOpen = !menuOpen;
-        if (!menuOpen) return;
-        engagementModalOpen = false;
-    }
-
-    function closeMenu() {
-        menuOpen = false;
-    }
-
     function toggleEngagementModal() {
         engagementModalOpen = !engagementModalOpen;
-        if (engagementModalOpen) menuOpen = false;
     }
 
     function handleWindowKeydown(e: KeyboardEvent) {
         if (e.key === "Escape") {
-            menuOpen = false;
             engagementModalOpen = false;
         }
     }
@@ -97,33 +84,9 @@
     <div
         class="flex h-full w-full max-w-6xl px-4 md:px-6 lg:px-8 mx-auto items-center"
     >
-        <!-- Left: Menu Button -->
-        <button
-            type="button"
-            on:click={toggleMenu}
-            aria-label={menuOpen ? "Close menu" : "Open menu"}
-            aria-expanded={menuOpen}
-            class="p-2 rounded-full hover:bg-neutral-100 transition md:border md:border-neutral-200 md:bg-white"
-        >
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="h-6 w-6 text-neutral-600"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-            >
-                <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M4 6h16M4 12h16M4 18h16"
-                />
-            </svg>
-        </button>
-
         <!-- Title -->
         <h1
-            class="font-manrope text-[1.35rem] md:text-[1.5rem] ml-1.5 font-bold text-[var(--color-primary-green)] select-none cursor-default"
+            class="font-manrope text-[1.35rem] md:text-[1.5rem] font-bold text-[var(--color-primary-green)] select-none cursor-default"
         >
             <span class="tracking-normal">HEAR</span> Journal
         </h1>
@@ -200,132 +163,6 @@
         </div>
     </div>
 </header>
-
-{#if menuOpen}
-    <button
-        type="button"
-        class="fixed inset-0 z-[60] bg-black/45"
-        on:click={closeMenu}
-        aria-label="Close menu"
-        transition:fade={{ duration: 160 }}
-    ></button>
-
-    <div
-        class="fixed left-0 top-0 z-[70] flex h-[100dvh] w-[86vw] max-w-sm flex-col bg-white text-[var(--color-text-primary)] shadow-2xl"
-        role="dialog"
-        aria-modal="true"
-        aria-label="Main menu"
-        transition:fly={{ x: -320, duration: 240, easing: cubicOut }}
-    >
-        <div
-            class="flex items-center gap-3 border-b border-neutral-200 px-5 py-5"
-        >
-            <div
-                class="h-11 w-11 rounded-full bg-[var(--color-primary-green)] flex items-center justify-center overflow-hidden"
-            >
-                <img
-                    src={avatarSrc}
-                    alt="User Avatar"
-                    class="h-9 w-auto"
-                    draggable="false"
-                />
-            </div>
-            <div>
-                <p
-                    class="font-manrope text-lg font-bold text-[var(--color-primary-green)]"
-                >
-                    HEAR Journal
-                </p>
-                <p class="font-inter text-sm text-neutral-500">New Testament</p>
-            </div>
-            <button
-                type="button"
-                class="ml-auto rounded-full p-2 text-neutral-500 transition hover:bg-neutral-100 hover:text-neutral-900"
-                on:click={closeMenu}
-                aria-label="Close menu"
-            >
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="h-5 w-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M6 18L18 6M6 6l12 12"
-                    />
-                </svg>
-            </button>
-        </div>
-
-        <div class="flex-1 overflow-y-auto px-5 py-5">
-            <section class="rounded-3xl bg-neutral-100 p-4">
-                <p
-                    class="font-inter text-xs uppercase tracking-wide text-neutral-500"
-                >
-                    My Rhythm
-                </p>
-                <div class="mt-3 grid grid-cols-2 gap-3">
-                    <div class="rounded-2xl bg-white p-4 shadow-sm">
-                        <p
-                            class="text-3xl font-semibold leading-none text-neutral-900"
-                        >
-                            {Math.max(1, daysOpened)}
-                        </p>
-                        <p class="mt-1 text-xs text-neutral-500">days opened</p>
-                    </div>
-                    <div class="rounded-2xl bg-white p-4 shadow-sm">
-                        <p
-                            class="text-3xl font-semibold leading-none text-neutral-900"
-                        >
-                            {planDaysCompleted}
-                        </p>
-                        <p class="mt-1 text-xs text-neutral-500">days read</p>
-                    </div>
-                </div>
-            </section>
-
-            <nav class="mt-6 space-y-2" aria-label="Menu">
-                <button
-                    type="button"
-                    class="flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left font-manrope text-neutral-800 transition hover:bg-neutral-100"
-                    on:click={toggleEngagementModal}
-                >
-                    <span>View rhythm details</span>
-                    <span class="text-neutral-400">›</span>
-                </button>
-                <button
-                    type="button"
-                    class="flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left font-manrope text-neutral-800 transition hover:bg-neutral-100"
-                    on:click={() =>
-                        document.getElementById("avatarPicker")?.click()}
-                >
-                    <span>Change avatar</span>
-                    <span class="text-neutral-400">›</span>
-                </button>
-                <button
-                    type="button"
-                    class="flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left font-manrope text-neutral-800 transition hover:bg-neutral-100"
-                    on:click={resetAvatar}
-                >
-                    <span>Reset avatar</span>
-                    <span class="text-neutral-400">↺</span>
-                </button>
-            </nav>
-        </div>
-
-        <div class="border-t border-neutral-200 px-5 py-4">
-            <p class="text-xs leading-5 text-neutral-500">
-                Built by Oliver Abreu as a personal utility for tracking the
-                current HEAR Journal reading plan, daily progress, and plan week
-                based on each participant’s meeting day.
-            </p>
-        </div>
-    </div>
-{/if}
 
 {#if engagementModalOpen}
     <!-- Backdrop -->

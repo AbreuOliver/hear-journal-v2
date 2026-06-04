@@ -97,5 +97,29 @@
       HEAR Journaling is a teaching framework developed by Replicate Ministries.
       This tool is not affiliated with, endorsed by, or officially connected to Replicate Ministries.
     </p>
+    <a
+      href="https://github.com/AbreuOliver"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="mt-5 inline-flex items-center justify-center gap-1.5 rounded-full px-3 py-1.5 font-manrope text-xs font-medium text-black/60 transition hover:bg-black/5 hover:text-black/85 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary-green)]"
+      aria-label="View creator on GitHub"
+    >
+      <span>made with</span>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="h-4 w-4"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M3 19h18" />
+        <path d="M5 6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v9H5z" />
+      </svg>
+      <span>in Raleigh, NC</span>
+    </a>
   </footer>
 </div>

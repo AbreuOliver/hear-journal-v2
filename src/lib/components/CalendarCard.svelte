@@ -156,10 +156,10 @@
             Select Meeting Day
           </p>
 
-          <fieldset class="flex justify-between gap-1" aria-label="Select Meeting Day">
+          <fieldset class="flex justify-between gap-0.5 min-[420px]:gap-1" aria-label="Select Meeting Day">
             {#each daysOfWeek as day}
               <label
-                class="h-11 w-11 rounded-full border text-sm font-medium flex items-center justify-center cursor-pointer select-none transition
+                class="h-10 w-10 rounded-full border text-[13px] font-medium flex shrink-0 items-center justify-center cursor-pointer select-none transition min-[420px]:h-11 min-[420px]:w-11 min-[420px]:text-sm
                 {$userPreferences.meetingDay === day.value
                   ? 'border-[var(--color-primary-green)] bg-[var(--color-primary-green)] font-semibold text-[var(--color-text-primary)]'
                   : 'border-transparent text-neutral-600 hover:border-neutral-300 hover:text-neutral-900'}"

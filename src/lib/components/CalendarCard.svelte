@@ -3,7 +3,6 @@
   import { userPreferences, type MeetingDay } from "$lib/stores/userPreferences.store";
   import { weekData } from "$lib/stores/weekData.store";
   
-  import ArrowDown from "$lib/components/icons/ArrowDown.svelte";
   import Calendar from "./icons/Calendar.icon.svelte";
   import Chevron from "./icons/Chevron.icon.svelte";
   import NarrowArrow from "$lib/components/icons/NarrowArrow.svelte";
@@ -63,14 +62,15 @@
     aria-expanded={cardExpanded}
     aria-controls={cardPanelId}
   >
-    <div class="flex items-center text-black/60 text-md text-left mr-6 py-2 gap-2 md:text-base">
+    <div class="flex min-w-0 items-center text-black/60 text-md text-left py-2 gap-2 md:text-base">
       <Calendar size={24} className="pt-0 mr-1 text-[currentColor]" />
-      <p class="font-manrope font-medium">
-        Week {$weekData.currentWeek} • {$weekData.weekRangeString}
+      <p class="font-manrope truncate">
+        <span class="font-semibold text-black/70">Week {$weekData.currentWeek}</span>
+        <span class="font-medium text-black/55"> • {$weekData.weekRangeString}</span>
       </p>
     </div>
 
-    <Chevron up={cardExpanded} size={16} className="text-zinc-500 mt-1 mr-auto" />
+    <Chevron up={cardExpanded} size={16} className="text-zinc-500 mt-1 ml-auto shrink-0" />
   </button>
 </div>
 
@@ -81,69 +81,67 @@
     class="w-screen -mx-4 -mt-4 px-6 py-8 border-b-2 border-neutral-200/25 bg-neutral-200/10 md:w-full md:mx-0 md:mt-3 md:rounded-3xl md:border md:border-black/5 md:bg-white/85 md:shadow-sm"
     transition:slide={{ duration: 300 }}
   >
-    <div class="flex w-full items-center mb-2">
-      <h2 class="pl-1 text-xs uppercase font-inter font-medium text-[var(--color-text-secondary)]">
-        Viewing<br />
-        {#if $weekData.isCurrentWeek}
-          Current Week
-        {:else if $userPreferences.weekOffset < 0}
-          {Math.abs($userPreferences.weekOffset)} Week{Math.abs($userPreferences.weekOffset) !== 1 ? "s" : ""} Ago
-        {:else}
-          {$userPreferences.weekOffset} Week{$userPreferences.weekOffset !== 1 ? "s" : ""} Ahead
-        {/if}
+    <div class="mb-3 grid w-full grid-cols-[2.5rem_1fr_2.5rem] items-center gap-2">
+      <button
+        on:click={() => changeWeek(-1)}
+        class="grid h-9 w-10 place-items-center rounded-2xl border border-neutral-300 bg-white/70 text-neutral-500 transition-colors hover:text-neutral-800"
+        aria-label="Previous Week"
+      >
+        <NarrowArrow direction="right" size={24} color="currentColor" />
+      </button>
+
+      <h2 class="text-center text-[11px] uppercase font-inter font-semibold tracking-wide text-neutral-500">
+        Viewing
+        <span class="block">
+          {#if $weekData.isCurrentWeek}
+            Current Week
+          {:else if $userPreferences.weekOffset < 0}
+            {Math.abs($userPreferences.weekOffset)} Week{Math.abs($userPreferences.weekOffset) !== 1 ? "s" : ""} Ago
+          {:else}
+            {$userPreferences.weekOffset} Week{$userPreferences.weekOffset !== 1 ? "s" : ""} Ahead
+          {/if}
+        </span>
       </h2>
 
-      <div class="flex items-center gap-1 ml-auto">
-        {#if !$weekData.isCurrentWeek}
-          <button
-            on:click={goToCurrentWeek}
-            class="flex items-center px-3 py-1.5 text-xs rounded-2xl bg-[var(--color-primary-green)] text-white hover:opacity-80 transition-opacity"
-            aria-label="Go to Current Week"
-          >
-            Back to Current Week
-          </button>
-        {/if}
-
-        <div class="flex items-center border border-neutral-300 rounded-2xl">
-          <button
-            on:click={() => changeWeek(-1)}
-            class="p-1 rounded hover:text-[var(--color-primary-green)] transition-colors"
-            aria-label="Previous Week"
-          >
-            <NarrowArrow direction="right" size={24} color="var(--color-text-muted)" />
-          </button>
-
-          <button
-            on:click={() => changeWeek(1)}
-            class="p-1 rounded hover:text-[var(--color-primary-green)] transition-colors"
-            aria-label="Next Week"
-          >
-            <NarrowArrow direction="left" size={24} color="var(--color-text-muted)" />
-          </button>
-        </div>
-      </div>
+      <button
+        on:click={() => changeWeek(1)}
+        class="grid h-9 w-10 place-items-center rounded-2xl border border-neutral-300 bg-white/70 text-neutral-500 transition-colors hover:text-neutral-800"
+        aria-label="Next Week"
+      >
+        <NarrowArrow direction="left" size={24} color="currentColor" />
+      </button>
     </div>
 
+    {#if !$weekData.isCurrentWeek}
+      <button
+        on:click={goToCurrentWeek}
+        class="mx-auto mb-3 flex items-center px-3 py-1.5 text-xs rounded-2xl bg-[var(--color-primary-green)] text-white hover:opacity-80 transition-opacity"
+        aria-label="Go to Current Week"
+      >
+        Back to Current Week
+      </button>
+    {/if}
+
     <!-- Meeting Day Section -->
-    <div class="flex flex-col min-h-10 p-2.5 border border-[#CDCFCE] rounded-[13px]">
+    <div class="flex flex-col min-h-10 p-2.5 border border-neutral-300 rounded-[13px] bg-white/40">
       <button
         on:click={toggleMeetingExpanded}
         class="flex items-center w-full min-h-6.5 bg-transparent cursor-pointer"
         aria-expanded={meetingExpanded}
         aria-controls="calendar-edit"
       >
-        <p class="font-manrope font-semibold text-[var(--color-text-primary)] text-left">
+        <p class="font-manrope font-medium text-neutral-800 text-left">
           Current Meeting Day:
-          <span class="ml-2 text-[var(--color-primary-green)]">
+          <span class="ml-2 font-semibold text-[var(--color-primary-green)]">
             {daysOfWeek.find((d) => d.value === $userPreferences.meetingDay)?.label}
           </span>
         </p>
 
-        <div class="flex items-center ml-auto">
-          <ArrowDown
+        <div class="ml-auto flex items-center">
+          <Chevron
             up={meetingExpanded}
-            size={28}
-            color={meetingExpanded ? "var(--color-primary-green)" : "var(--color-text-muted)"}
+            size={16}
+            className="text-zinc-500"
           />
         </div>
       </button>
@@ -151,20 +149,20 @@
       {#if meetingExpanded}
         <div
           id="calendar-edit"
-          class="mt-3 p-3 rounded-[13px] bg-neutral-100"
+          class="mt-3 p-3 rounded-[13px] bg-white/60"
           transition:slide={{ duration: 300 }}
         >
-          <p class="mb-3 font-inter font-medium tracking-tight text-[var(--color-text-muted)] text-sm">
+          <p class="mb-3 font-inter text-xs font-medium text-neutral-500">
             Select Meeting Day
           </p>
 
-          <fieldset class="-ml-2 flex justify-between gap-1" aria-label="Select Meeting Day">
+          <fieldset class="flex justify-between gap-1" aria-label="Select Meeting Day">
             {#each daysOfWeek as day}
               <label
-                class="flex-1 max-w-[calc(100%/7)] h-11 px-2 py-1 rounded-[3rem] border text-sm font-medium flex items-center justify-center cursor-pointer select-none transition
+                class="h-11 w-11 rounded-full border text-sm font-medium flex items-center justify-center cursor-pointer select-none transition
                 {$userPreferences.meetingDay === day.value
-                  ? 'border-[var(--color-primary-green)] bg-[var(--color-primary-green)] text-[var(--color-text-primary)]'
-                  : 'border-transparent text-[var(--color-text-secondary)] hover:border-[var(--color-text-muted)]'}"
+                  ? 'border-[var(--color-primary-green)] bg-[var(--color-primary-green)] font-semibold text-[var(--color-text-primary)]'
+                  : 'border-transparent text-neutral-600 hover:border-neutral-300 hover:text-neutral-900'}"
               >
                 <input
                   type="radio"

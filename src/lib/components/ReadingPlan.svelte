@@ -1,5 +1,6 @@
 <script lang="ts">
     import { onMount } from "svelte";
+    import { browser } from "$app/environment";
     import { userPreferences } from "$lib/stores/userPreferences.store";
     import { getWeekOfYear, getWeekRange } from "$lib/utils/calculateWeek";
     import { getReadingPlan } from "$lib/utils/getPlanData";
@@ -43,6 +44,7 @@
 
     // Completion array stored locally after mount
     let allCompleted: boolean[] = [];
+    let progressCircleElement: HTMLDivElement;
 
     function storageKey() {
         return `plan:${selectedPlan}:week:${currentWeek}`;
@@ -70,8 +72,18 @@
     }
 
     function toggleDayCompletion(index: number) {
-        allCompleted[index] = !allCompleted[index];
+        const wasFullyComplete = allCompleted.length > 0 && allCompleted.every(Boolean);
+        allCompleted = allCompleted.map((completed, dayIndex) =>
+            dayIndex === index ? !completed : completed
+        );
         saveCompletedDays();
+
+        const isFullyComplete = allCompleted.length > 0 && allCompleted.every(Boolean);
+        if (!wasFullyComplete && isFullyComplete) {
+            window.setTimeout(() => {
+                fireReadingPlanConfetti();
+            }, 180);
+        }
 
         userPreferences.update((prefs) => {
             const weekKey = `Week ${currentWeek}, Day ${index + 1}, Plan ${selectedPlan}`;
@@ -83,6 +95,40 @@
                     : [...prefs.completedDays, weekKey],
             };
         });
+    }
+
+    async function fireReadingPlanConfetti() {
+        if (!browser || !progressCircleElement) return;
+
+        const rect = progressCircleElement.getBoundingClientRect();
+        const origin = {
+            x: Math.min(Math.max((rect.left + rect.width / 2) / window.innerWidth, 0), 1),
+            y: Math.min(Math.max((rect.top + rect.height / 2) / window.innerHeight, 0), 1),
+        };
+        const { default: confetti } = await import("canvas-confetti");
+        const count = 200;
+        const defaults = {
+            origin,
+            colors: ["#82D844", "#FFFFFF", "#FDE68A", "#86EFAC", "#D9F99D"],
+            disableForReducedMotion: true,
+            zIndex: 1000,
+        };
+        const fire = (
+            particleRatio: number,
+            opts: Parameters<typeof confetti>[0]
+        ) => {
+            confetti({
+                ...defaults,
+                ...opts,
+                particleCount: Math.floor(count * particleRatio),
+            });
+        };
+
+        fire(0.25, { spread: 26, startVelocity: 55 });
+        fire(0.2, { spread: 60 });
+        fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
+        fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 });
+        fire(0.1, { spread: 120, startVelocity: 45 });
     }
 
     // Load completion data only on client mount
@@ -133,7 +179,7 @@
         >
             Bible Reading
         </h2>
-        <div class="flex">
+        <div class="flex" bind:this={progressCircleElement}>
             <p class="text-[var(--color-text-secondary)] pr-2">
                 <span
                     class:text-[var(--color-primary-green)]={completionPercent ===
@@ -189,7 +235,7 @@
         </p>
     </div>
     <div
-        class="w-full flex items-center justify-center bg-(--color-text-secondary) h-0.5 my-6"
+        class="w-full flex items-center justify-center bg-[var(--color-text-secondary)] h-0.5 my-6"
     ></div>
     <div class="min-h-10 flex-col justify-start text-left px-4 space-y-4 pb-6">
         {#if groupedPassages.length}

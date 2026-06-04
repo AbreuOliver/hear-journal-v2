@@ -55,7 +55,7 @@
 </script>
 
 <!-- Calendar Card Header -->
-<div class="w-screen px-6 -mx-4 border-y-2 border-neutral-200/25  hover:bg-neutral-100 hover:rounded-full transition-colors flex items-center justify-center py-2.5">
+<div class="w-screen px-6 -mx-4 border-y border-neutral-200 bg-white shadow-sm transition-colors flex items-center justify-center py-2.5 hover:bg-neutral-50 md:w-full md:mx-0 md:rounded-2xl md:border md:border-black/5 md:bg-white md:px-5 md:shadow-sm md:hover:rounded-2xl">
   <button
     class="flex items-center w-full cursor-pointer focus:outline-none"
     on:click={toggleCardExpanded}
@@ -63,7 +63,7 @@
     aria-expanded={cardExpanded}
     aria-controls={cardPanelId}
   >
-    <div class="flex items-center text-black/60 text-md text-left mr-6 py-2 gap-2">
+    <div class="flex items-center text-black/60 text-md text-left mr-6 py-2 gap-2 md:text-base">
       <Calendar size={24} className="pt-0 mr-1 text-[currentColor]" />
       <p class="font-manrope font-medium">
         Week {$weekData.currentWeek} • {$weekData.weekRangeString}
@@ -78,7 +78,7 @@
 {#if cardExpanded}
   <div
     id={cardPanelId}
-    class="w-screen -mx-4 -mt-4 px-6 py-8 border-b-2 border-neutral-200/25 bg-neutral-200/10"
+    class="w-screen -mx-4 -mt-4 px-6 py-8 border-b-2 border-neutral-200/25 bg-neutral-200/10 md:w-full md:mx-0 md:mt-3 md:rounded-3xl md:border md:border-black/5 md:bg-white/85 md:shadow-sm"
     transition:slide={{ duration: 300 }}
   >
     <div class="flex w-full items-center mb-2">
@@ -158,7 +158,7 @@
             Select Meeting Day
           </p>
 
-          <fieldset class="-ml-2 flex justify-between" aria-label="Select Meeting Day">
+          <fieldset class="-ml-2 flex justify-between gap-1" aria-label="Select Meeting Day">
             {#each daysOfWeek as day}
               <label
                 class="flex-1 max-w-[calc(100%/7)] h-11 px-2 py-1 rounded-[3rem] border text-sm font-medium flex items-center justify-center cursor-pointer select-none transition

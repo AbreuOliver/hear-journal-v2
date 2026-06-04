@@ -13,7 +13,7 @@
 </script>
 
 <div
-  class="rounded-[20px] flex-col"
+  class="rounded-[20px] flex-col shadow-sm ring-1 ring-white/10 md:rounded-[28px] md:shadow-xl md:shadow-black/10"
   style={`background-color: ${bgColor}; padding: ${paddingClasses[padding]}`}
 >
   <slot />

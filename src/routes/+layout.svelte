@@ -76,8 +76,8 @@
   <link rel="icon" href={favicon} />
 </svelte:head>
 
-<div class="max-w-md mx-auto">
-  <div class="sticky top-0 z-50 bg-white">
+<div class="min-h-screen">
+  <div class="sticky top-0 z-50 border-b border-black/5 bg-white/95">
     <Header />
   </div>
 
@@ -86,14 +86,14 @@
       <Splash onDone={handleSplashDone} />
     {/if}
 
-    <div class="flex-1 w-full mx-auto sm:px-0 overflow-x-hidden">
+    <div class="flex-1 w-full mx-auto overflow-x-hidden">
       <slot />
     </div>
   </div>
-  <footer class="text-center text-sm text-black/70 py-6 px-4 bg-neutral-200">
+  <footer class="mx-auto mb-0 max-w-6xl text-center text-sm text-black/70 py-6 px-6 bg-neutral-200 md:mb-8 md:rounded-[28px] md:border md:border-black/5 md:bg-white/75 md:shadow-sm">
     <p class="text-black/90 font-manrope font-semibold">HEAR Journal &copy; {currentYear}</p>
     <hr class="mb-4 mt-3 border-t border-neutral-300 text-serif" />
-    <p class="px-4">HEAR Journal is an independent companion app for the HEAR Journaling method.
+    <p class="mx-auto max-w-2xl px-4">HEAR Journal is an independent companion app for the HEAR Journaling method.
       HEAR Journaling is a teaching framework developed by Replicate Ministries.
       This tool is not affiliated with, endorsed by, or officially connected to Replicate Ministries.
     </p>

@@ -81,7 +81,7 @@
 
 <!-- <SectionCard padding="lg"> -->
  <SectionCard padding="none">
-  <div class="flex flex-col items-start justify-start px-6 pt-6 pb-4">
+  <div class="flex flex-col items-start justify-start px-6 pt-6 pb-4 md:px-7 md:pt-7">
     <h2
       class="pl-1 text-[13px] uppercase font-inter font-medium mb-0 text-[var(--color-text-muted)]"
     >
@@ -91,14 +91,14 @@
     Memory Verse
   </h2>
   </div>
-  <div class="px-6 pb-6 flex flex-col">
-  <p class="font-manrope text-2xl grow-1 font-semibold text-white">
+  <div class="px-6 pb-6 flex flex-col md:px-7 md:pb-7">
+  <p class="font-manrope text-2xl md:text-3xl grow-1 font-semibold text-white">
     {Array.isArray(memoryVerseDisplay)
       ? memoryVerseDisplay.join(", ")
       : memoryVerseDisplay}
   </p>
 
-  <div class="min-h-10 py-6 relative">
+  <div class="min-h-10 py-6 md:py-8 relative">
     <p
       class="font-manrope text-lg/6 pl-0.5 text-[var(--color-text-muted)] transition-filter duration-300 whitespace-pre-line"
       class:blur-sm={!revealed}

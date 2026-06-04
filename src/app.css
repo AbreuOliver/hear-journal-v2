@@ -39,6 +39,14 @@ html {
   margin: 0;
 }
 
+body {
+  min-height: 100%;
+  margin: 0;
+  background:
+    radial-gradient(circle at top left, rgb(130 216 68 / 0.12), transparent 30rem),
+    linear-gradient(180deg, #ffffff 0%, #f7f7f5 48%, #eeeeeb 100%);
+}
+
 footer p {
    font-family: "app-sans", sans-serif;
 }

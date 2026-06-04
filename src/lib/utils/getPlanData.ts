@@ -20,7 +20,7 @@ export function getReadingPlan(
   weekNumber: number,
   selectedPlan: string
 ): ReadingPlan {
-  const planKeyMap: Record<string, string> = {
+  const planKeyMap: Record<string, keyof typeof plansData> = {
     "New Testament": "F260_NewTestament",
     "Whole Bible": "F260_WholeBible",
     "Old Testament": "F260_OldTestament",
@@ -32,7 +32,7 @@ export function getReadingPlan(
     return null;
   }
 
-  const planData = plansData[key];
+  const planData = plansData[key] as Record<string, PlanEntry> | undefined;
   if (!planData) {
     console.warn("Missing plan data for key:", key);
     return null;

@@ -6,9 +6,16 @@
   import kjv from "$lib/data/kjv.json";
   import { getWeekOfYear } from "$lib/utils/calculateWeek";
   import { getReadingPlan } from "$lib/utils/getPlanData";
+  import { trackEvent } from "$lib/utils/analytics";
 
   let revealed = false;
   function toggleReveal() {
+    trackEvent(revealed ? "memory-verse-hide" : "memory-verse-show", {
+      week: currentWeek,
+      reference: Array.isArray(memoryVerseDisplay)
+        ? memoryVerseDisplay.join(", ")
+        : memoryVerseDisplay,
+    });
     revealed = !revealed;
   }
 

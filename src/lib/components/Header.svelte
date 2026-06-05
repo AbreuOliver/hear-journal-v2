@@ -5,6 +5,7 @@
     import { fade, fly, scale } from "svelte/transition";
     import { elasticOut, cubicOut, cubicIn } from "svelte/easing";
     import { browser } from "$app/environment";
+    import { trackEvent } from "$lib/utils/analytics";
 
     // ✅ NOT a streak — just cumulative unique days opened
     $: daysOpened = $engagement.totalOpenDays;
@@ -13,30 +14,55 @@
     $: planDaysCompleted = $engagementMetrics.totalDaysCompleted;
 
     let engagementModalOpen = false;
+    let avatarModalOpen = false;
+    let avatarVisible = true;
 
     // iOS detection (Safari + iOS PWA)
     let isIOS = false;
 
     function toggleEngagementModal() {
-        engagementModalOpen = !engagementModalOpen;
+        const willOpen = !engagementModalOpen;
+        engagementModalOpen = willOpen;
+        if (willOpen) avatarModalOpen = false;
+        trackEvent(willOpen ? "rhythm-modal-open" : "rhythm-modal-close", {
+            days_opened: Math.max(1, daysOpened),
+            plan_days_completed: planDaysCompleted,
+        });
+    }
+
+    function toggleAvatarModal() {
+        const willOpen = !avatarModalOpen;
+        avatarModalOpen = willOpen;
+        if (willOpen) engagementModalOpen = false;
+        trackEvent(willOpen ? "avatar-modal-open" : "avatar-modal-close", {
+            avatar_visible: avatarVisible,
+            custom_avatar: avatarSrc !== fallbackAvatar,
+        });
+    }
+
+    function closeAvatarModal() {
+        avatarModalOpen = false;
     }
 
     function handleWindowKeydown(e: KeyboardEvent) {
         if (e.key === "Escape") {
             engagementModalOpen = false;
+            avatarModalOpen = false;
         }
     }
 
     const AVATAR_KEY = "hearjournal.avatar.dataurl";
+    const AVATAR_VISIBLE_KEY = "hearjournal.avatar.visible";
 
     const fallbackAvatar =
-        "https://ik.imagekit.io/bip1v395ybp/image%203_nuLAwU-HR.png";
+        "https://ik.imagekit.io/bip1v395ybp/oliver-memoji_RMppMBYW_.png?updatedAt=1770330181441";
 
     let avatarSrc: string = fallbackAvatar;
 
     onMount(() => {
         const saved = localStorage.getItem(AVATAR_KEY);
         if (saved) avatarSrc = saved;
+        avatarVisible = localStorage.getItem(AVATAR_VISIBLE_KEY) !== "false";
 
         if (browser) {
             const ua = navigator.userAgent || "";
@@ -61,11 +87,37 @@
         localStorage.setItem(AVATAR_KEY, dataUrl);
 
         input.value = "";
+        avatarVisible = true;
+        localStorage.setItem(AVATAR_VISIBLE_KEY, "true");
+        avatarModalOpen = false;
+        trackEvent("avatar-change");
     }
 
     function resetAvatar() {
         localStorage.removeItem(AVATAR_KEY);
         avatarSrc = fallbackAvatar;
+        avatarVisible = true;
+        localStorage.setItem(AVATAR_VISIBLE_KEY, "true");
+        trackEvent("avatar-reset");
+    }
+
+    function openAvatarPicker() {
+        trackEvent("avatar-picker-open");
+        document.getElementById("avatarPicker")?.click();
+    }
+
+    function hideAvatar() {
+        avatarVisible = false;
+        localStorage.setItem(AVATAR_VISIBLE_KEY, "false");
+        avatarModalOpen = false;
+        trackEvent("avatar-hide");
+    }
+
+    function showAvatar() {
+        avatarVisible = true;
+        localStorage.setItem(AVATAR_VISIBLE_KEY, "true");
+        avatarModalOpen = false;
+        trackEvent("avatar-show");
     }
 
     function readAsDataUrl(file: File) {
@@ -125,7 +177,7 @@
                 </span>
             </button>
 
-            <!-- Avatar (click to change) -->
+            <!-- Avatar settings -->
             <div class="relative">
                 <input
                     id="avatarPicker"
@@ -135,41 +187,228 @@
                     on:change={onAvatarPicked}
                 />
 
-                <button
-                    type="button"
-                    class="h-9 w-9 rounded-full bg-[var(--color-primary-green)] flex items-center justify-center overflow-hidden"
-                    aria-label="Change user avatar"
-                    on:click={() =>
-                        document.getElementById("avatarPicker")?.click()}
-                >
-                    <img
-                        src={avatarSrc}
-                        alt="User Avatar"
-                        class="h-7 w-auto"
-                        draggable="false"
-                    />
-                </button>
+                {#if avatarVisible}
+                    <button
+                        type="button"
+                        class="relative h-9 w-9 rounded-full bg-[var(--color-primary-green)] flex items-center justify-center overflow-visible"
+                        aria-label="Open avatar settings"
+                        on:click={toggleAvatarModal}
+                    >
+                        <span
+                            class="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full"
+                        >
+                            <img
+                                src={avatarSrc}
+                                alt="User Avatar"
+                                class={avatarSrc === fallbackAvatar
+                                    ? "h-7 w-auto"
+                                    : "h-full w-full object-cover"}
+                                draggable="false"
+                            />
+                        </span>
 
-                <button
-                    type="button"
-                    class="absolute -bottom-2 -right-2 h-5 w-5 rounded-full bg-white border border-neutral-200 text-[10px] leading-none flex items-center justify-center hover:bg-neutral-50"
-                    aria-label="Reset avatar"
-                    on:click={resetAvatar}
-                    title="Reset"
-                >
-                    ↺
-                </button>
+                        {#if avatarSrc === fallbackAvatar}
+                            <span
+                                class="absolute -bottom-1.5 -right-1.5 grid h-5 w-5 place-items-center rounded-full border border-neutral-200 bg-white text-neutral-500 shadow-sm"
+                                aria-hidden="true"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-3.5 w-3.5"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                >
+                                    <path
+                                        d="M14.5 4h-5L8 6H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-3z"
+                                    />
+                                    <circle cx="12" cy="13" r="3" />
+                                </svg>
+                            </span>
+                        {/if}
+                    </button>
+                {:else}
+                    <button
+                        type="button"
+                        class="grid h-9 w-9 place-items-center rounded-full border border-neutral-200 bg-white text-neutral-500 transition hover:bg-neutral-50 hover:text-neutral-800"
+                        aria-label="Open avatar settings"
+                        on:click={toggleAvatarModal}
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-5 w-5"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            aria-hidden="true"
+                        >
+                            <circle cx="12" cy="8" r="4" />
+                            <path d="M4 21a8 8 0 0 1 16 0" />
+                        </svg>
+                    </button>
+                {/if}
             </div>
         </div>
     </div>
 </header>
+
+{#if avatarModalOpen}
+    {#if isIOS}
+        <button
+            type="button"
+            class="fixed inset-0 z-60 bg-black/55"
+            on:click={closeAvatarModal}
+            aria-label="Close avatar modal"
+            in:fade={{ duration: 120 }}
+            out:fade={{ duration: 120 }}
+        ></button>
+    {:else}
+        <button
+            type="button"
+            transition:fade={{ duration: 160 }}
+            class="fixed inset-0 z-[60] bg-black/55 backdrop-blur-[4px]"
+            on:click={closeAvatarModal}
+            aria-label="Close avatar modal"
+        ></button>
+    {/if}
+
+    <div
+        class="fixed top-[50vh] left-[50vw] -translate-x-1/2 -translate-y-1/2 z-[70]
+             w-[92vw] max-w-md rounded-3xl shadow-2xl
+             max-h-[calc(100vh-2rem)] overflow-y-auto bg-[#1e1e1e] text-white p-6"
+        in:scale={{ start: 0.98, duration: 140, easing: cubicOut, opacity: 0 }}
+        out:scale={{ start: 0.98, duration: 120, easing: cubicIn, opacity: 0 }}
+    >
+        <div class="mb-6 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <h2
+                    class="text-xl font-semibold font-manrope text-[var(--color-primary-green)]"
+                >
+                    Avatar
+                </h2>
+                <div
+                    class="h-12 w-12 rounded-full bg-[var(--color-primary-green)] flex items-center justify-center overflow-hidden"
+                    class:bg-neutral-700={!avatarVisible}
+                >
+                    {#if avatarVisible}
+                        <img
+                            src={avatarSrc}
+                            alt="User Avatar"
+                            class={avatarSrc === fallbackAvatar
+                                ? "h-10 w-auto"
+                                : "h-full w-full object-cover"}
+                            draggable="false"
+                        />
+                    {:else}
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-7 w-7 text-white/70"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            aria-hidden="true"
+                        >
+                            <circle cx="12" cy="8" r="4" />
+                            <path d="M4 21a8 8 0 0 1 16 0" />
+                        </svg>
+                    {/if}
+                </div>
+            </div>
+
+            <button
+                on:click={closeAvatarModal}
+                class="p-2 rounded-full hover:bg-white/10 transition"
+                aria-label="Close"
+            >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-5 w-5 text-white/70"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M6 18L18 6M6 6l12 12"
+                    />
+                </svg>
+            </button>
+        </div>
+
+        <div class="space-y-3">
+            <button
+                type="button"
+                class="flex w-full items-center justify-between rounded-2xl bg-white/5 px-4 py-3 text-left font-manrope text-white transition hover:bg-white/10"
+                on:click={openAvatarPicker}
+            >
+                <span>Upload picture</span>
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-5 w-5 text-[var(--color-primary-green)]"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                >
+                    <path
+                        d="M14.5 4h-5L8 6H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-3z"
+                    />
+                    <circle cx="12" cy="13" r="3" />
+                </svg>
+            </button>
+
+            <button
+                type="button"
+                class="flex w-full items-center justify-between rounded-2xl bg-white/5 px-4 py-3 text-left font-manrope text-white transition hover:bg-white/10"
+                on:click={resetAvatar}
+            >
+                <span>Reset to default</span>
+                <span class="text-lg leading-none text-white/55">↺</span>
+            </button>
+
+            {#if avatarVisible}
+                <button
+                    type="button"
+                    class="flex w-full items-center justify-between rounded-2xl bg-white/5 px-4 py-3 text-left font-manrope text-white transition hover:bg-white/10"
+                    on:click={hideAvatar}
+                >
+                    <span>Hide avatar</span>
+                    <span class="text-white/55">−</span>
+                </button>
+            {:else}
+                <button
+                    type="button"
+                    class="flex w-full items-center justify-between rounded-2xl bg-white/5 px-4 py-3 text-left font-manrope text-white transition hover:bg-white/10"
+                    on:click={showAvatar}
+                >
+                    <span>Show avatar</span>
+                    <span class="text-[var(--color-primary-green)]">+</span>
+                </button>
+            {/if}
+        </div>
+    </div>
+{/if}
 
 {#if engagementModalOpen}
     <!-- Backdrop -->
     {#if isIOS}
         <button
             type="button"
-            class="fixed inset-0 z-[60] bg-black/55"
+            class="fixed inset-0 z-60 bg-black/55"
             on:click={toggleEngagementModal}
             aria-label="Close rhythm modal"
             in:fade={{ duration: 120 }}
@@ -219,7 +458,9 @@
                         <img
                             src={avatarSrc}
                             alt="User Avatar"
-                            class="h-7 w-auto object-fill"
+                            class={avatarSrc === fallbackAvatar
+                                ? "h-7 w-auto"
+                                : "h-full w-full object-cover"}
                             draggable="false"
                         />
                     </div>
@@ -356,7 +597,9 @@
                         <img
                             src={avatarSrc}
                             alt="User Avatar"
-                            class="h-7 w-auto object-fill"
+                            class={avatarSrc === fallbackAvatar
+                                ? "h-7 w-auto"
+                                : "h-full w-full object-cover"}
                             draggable="false"
                         />
                     </div>

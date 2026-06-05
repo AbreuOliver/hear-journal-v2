@@ -6,6 +6,7 @@
   import Calendar from "./icons/Calendar.icon.svelte";
   import Chevron from "./icons/Chevron.icon.svelte";
   import NarrowArrow from "$lib/components/icons/NarrowArrow.svelte";
+  import { trackEvent } from "$lib/utils/analytics";
 
   const daysOfWeek = [
     { value: 0, label: "Sunday" },
@@ -22,19 +23,43 @@
   let cardExpanded = false;
   let meetingExpanded = false;
 
+  function meetingDayLabel(day: MeetingDay) {
+    return daysOfWeek.find((d) => d.value === day)?.label ?? String(day);
+  }
+
   function toggleCardExpanded() {
-    cardExpanded = !cardExpanded;
+    const willExpand = !cardExpanded;
+    cardExpanded = willExpand;
+    trackEvent(willExpand ? "week-panel-open" : "week-panel-close", {
+      week: $weekData.currentWeek,
+      week_offset: $userPreferences.weekOffset,
+      is_current_week: $weekData.isCurrentWeek,
+    });
   }
 
   function toggleMeetingExpanded() {
-    meetingExpanded = !meetingExpanded;
+    const willExpand = !meetingExpanded;
+    meetingExpanded = willExpand;
+    trackEvent(willExpand ? "meeting-day-panel-open" : "meeting-day-panel-close", {
+      meeting_day: meetingDayLabel($userPreferences.meetingDay),
+    });
   }
 
   function changeMeetingDay(day: MeetingDay) {
+    trackEvent("meeting-day-change", {
+      previous_meeting_day: meetingDayLabel($userPreferences.meetingDay),
+      meeting_day: meetingDayLabel(day),
+      week: $weekData.currentWeek,
+    });
     userPreferences.update((prefs) => ({ ...prefs, meetingDay: day }));
   }
 
   function changeWeek(delta: number) {
+    trackEvent(delta < 0 ? "week-change-previous" : "week-change-next", {
+      from_week: $weekData.currentWeek,
+      from_week_offset: $userPreferences.weekOffset,
+      to_week_offset: $userPreferences.weekOffset + delta,
+    });
     userPreferences.update((prefs) => ({ 
       ...prefs, 
       weekOffset: prefs.weekOffset + delta 
@@ -42,6 +67,10 @@
   }
 
   function goToCurrentWeek() {
+    trackEvent("week-change-current", {
+      from_week: $weekData.currentWeek,
+      from_week_offset: $userPreferences.weekOffset,
+    });
     userPreferences.update((prefs) => ({ ...prefs, weekOffset: 0 }));
   }
 

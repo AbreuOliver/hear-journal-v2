@@ -6,6 +6,7 @@
     import { getReadingPlan } from "$lib/utils/getPlanData";
     import { toBibleLink } from "$lib/utils/youVersionBibleLinkCreator";
     import SectionCard from "$lib/components/SectionCard.svelte";
+    import { trackEvent } from "$lib/utils/analytics";
 
     const today = new Date();
 
@@ -73,12 +74,24 @@
 
     function toggleDayCompletion(index: number) {
         const wasFullyComplete = allCompleted.length > 0 && allCompleted.every(Boolean);
+        const wasDayCompleted = allCompleted[index];
         allCompleted = allCompleted.map((completed, dayIndex) =>
             dayIndex === index ? !completed : completed
         );
         saveCompletedDays();
 
         const isFullyComplete = allCompleted.length > 0 && allCompleted.every(Boolean);
+        trackEvent(wasDayCompleted ? "reading-day-incomplete" : "reading-day-complete", {
+            plan: selectedPlan,
+            week: currentWeek,
+            day: index + 1,
+            passages: groupedPassages[index]?.join(", ") ?? "",
+            completion_percent: Math.round(
+                (allCompleted.filter(Boolean).length / allCompleted.length) * 100
+            ),
+            week_complete: isFullyComplete,
+        });
+
         if (!wasFullyComplete && isFullyComplete) {
             window.setTimeout(() => {
                 fireReadingPlanConfetti();

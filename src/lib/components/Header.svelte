@@ -34,10 +34,10 @@
         const willOpen = !avatarModalOpen;
         avatarModalOpen = willOpen;
         if (willOpen) engagementModalOpen = false;
-        trackEvent(willOpen ? "avatar-modal-open" : "avatar-modal-close", {
-            avatar_visible: avatarVisible,
-            custom_avatar: avatarSrc !== fallbackAvatar,
-        });
+        trackEvent(
+            willOpen ? "avatar-modal-open" : "avatar-modal-close",
+            avatarAnalyticsState()
+        );
     }
 
     function closeAvatarModal() {
@@ -59,6 +59,26 @@
 
     let avatarSrc: string = fallbackAvatar;
 
+    function avatarAnalyticsState() {
+        return {
+            avatar_visible: avatarVisible,
+            avatar_state: avatarVisible
+                ? avatarSrc === fallbackAvatar
+                    ? "default"
+                    : "custom"
+                : "hidden",
+            custom_avatar: avatarSrc !== fallbackAvatar,
+        };
+    }
+
+    function fileSizeBucket(size: number) {
+        if (size < 100_000) return "under_100kb";
+        if (size < 500_000) return "100kb_500kb";
+        if (size < 1_000_000) return "500kb_1mb";
+        if (size <= 2_000_000) return "1mb_2mb";
+        return "over_2mb";
+    }
+
     onMount(() => {
         const saved = localStorage.getItem(AVATAR_KEY);
         if (saved) avatarSrc = saved;
@@ -77,12 +97,38 @@
     async function onAvatarPicked(e: Event) {
         const input = e.currentTarget as HTMLInputElement;
         const file = input.files?.[0];
-        if (!file) return;
+        if (!file) {
+            trackEvent("avatar-upload-cancel", avatarAnalyticsState());
+            return;
+        }
 
-        if (!file.type.startsWith("image/")) return;
-        if (file.size > 2_000_000) return;
+        const fileData = {
+            ...avatarAnalyticsState(),
+            file_type: file.type || "unknown",
+            file_size_bucket: fileSizeBucket(file.size),
+        };
+
+        trackEvent("avatar-upload-select", fileData);
+
+        if (!file.type.startsWith("image/")) {
+            trackEvent("avatar-upload-reject", {
+                ...fileData,
+                reason: "not_image",
+            });
+            input.value = "";
+            return;
+        }
+        if (file.size > 2_000_000) {
+            trackEvent("avatar-upload-reject", {
+                ...fileData,
+                reason: "too_large",
+            });
+            input.value = "";
+            return;
+        }
 
         const dataUrl = await readAsDataUrl(file);
+        const previousState = avatarAnalyticsState().avatar_state;
         avatarSrc = dataUrl;
         localStorage.setItem(AVATAR_KEY, dataUrl);
 
@@ -90,34 +136,52 @@
         avatarVisible = true;
         localStorage.setItem(AVATAR_VISIBLE_KEY, "true");
         avatarModalOpen = false;
-        trackEvent("avatar-change");
+        trackEvent("avatar-upload-success", {
+            ...fileData,
+            previous_avatar_state: previousState,
+            avatar_state: "custom",
+            avatar_visible: true,
+            custom_avatar: true,
+        });
     }
 
     function resetAvatar() {
+        const previousState = avatarAnalyticsState().avatar_state;
         localStorage.removeItem(AVATAR_KEY);
         avatarSrc = fallbackAvatar;
         avatarVisible = true;
         localStorage.setItem(AVATAR_VISIBLE_KEY, "true");
-        trackEvent("avatar-reset");
+        trackEvent("avatar-reset", {
+            ...avatarAnalyticsState(),
+            previous_avatar_state: previousState,
+        });
     }
 
     function openAvatarPicker() {
-        trackEvent("avatar-picker-open");
+        trackEvent("avatar-picker-open", avatarAnalyticsState());
         document.getElementById("avatarPicker")?.click();
     }
 
     function hideAvatar() {
+        const previousState = avatarAnalyticsState().avatar_state;
         avatarVisible = false;
         localStorage.setItem(AVATAR_VISIBLE_KEY, "false");
         avatarModalOpen = false;
-        trackEvent("avatar-hide");
+        trackEvent("avatar-hide", {
+            ...avatarAnalyticsState(),
+            previous_avatar_state: previousState,
+        });
     }
 
     function showAvatar() {
+        const previousState = avatarAnalyticsState().avatar_state;
         avatarVisible = true;
         localStorage.setItem(AVATAR_VISIBLE_KEY, "true");
         avatarModalOpen = false;
-        trackEvent("avatar-show");
+        trackEvent("avatar-show", {
+            ...avatarAnalyticsState(),
+            previous_avatar_state: previousState,
+        });
     }
 
     function readAsDataUrl(file: File) {
@@ -248,8 +312,11 @@
                             stroke-linejoin="round"
                             aria-hidden="true"
                         >
-                            <circle cx="12" cy="8" r="4" />
-                            <path d="M4 21a8 8 0 0 1 16 0" />
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                            <path d="M12 21a9 9 0 1 1 0 -18a9 9 0 0 1 0 18" />
+                            <path d="M10 10c-.5 -1 -2.5 -1 -3 0" />
+                            <path d="M17 10c-.5 -1 -2.5 -1 -3 0" />
+                            <path d="M14.5 15a3.5 3.5 0 0 1 -5 0" />
                         </svg>
                     </button>
                 {/if}
@@ -262,7 +329,7 @@
     {#if isIOS}
         <button
             type="button"
-            class="fixed inset-0 z-60 bg-black/55"
+            class="fixed inset-0 z-60 bg-black/55 backdrop-blur-[4px]"
             on:click={closeAvatarModal}
             aria-label="Close avatar modal"
             in:fade={{ duration: 120 }}
@@ -317,8 +384,11 @@
                             stroke-linejoin="round"
                             aria-hidden="true"
                         >
-                            <circle cx="12" cy="8" r="4" />
-                            <path d="M4 21a8 8 0 0 1 16 0" />
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                            <path d="M12 21a9 9 0 1 1 0 -18a9 9 0 0 1 0 18" />
+                            <path d="M10 10c-.5 -1 -2.5 -1 -3 0" />
+                            <path d="M17 10c-.5 -1 -2.5 -1 -3 0" />
+                            <path d="M14.5 15a3.5 3.5 0 0 1 -5 0" />
                         </svg>
                     {/if}
                 </div>
@@ -400,6 +470,12 @@
                 </button>
             {/if}
         </div>
+
+        <p class="mt-5 px-1 text-xs leading-5 text-white/50">
+            Uploaded images stay on this device only. HEAR Journal stores avatar
+            choices locally in your browser and does not save or sync image data
+            to the cloud.
+        </p>
     </div>
 {/if}
 
@@ -408,7 +484,7 @@
     {#if isIOS}
         <button
             type="button"
-            class="fixed inset-0 z-60 bg-black/55"
+            class="fixed inset-0 z-60 bg-black/55 backdrop-blur-[4px]"
             on:click={toggleEngagementModal}
             aria-label="Close rhythm modal"
             in:fade={{ duration: 120 }}
@@ -453,16 +529,37 @@
                         My Rhythm
                     </h2>
                     <div
-                        class="h-9 w-9 rounded-full bg-neutral-400 flex items-center justify-center overflow-hidden"
+                        class="h-9 w-9 rounded-full bg-[var(--color-primary-green)] flex items-center justify-center overflow-hidden"
+                        class:bg-neutral-700={!avatarVisible}
                     >
-                        <img
-                            src={avatarSrc}
-                            alt="User Avatar"
-                            class={avatarSrc === fallbackAvatar
-                                ? "h-7 w-auto"
-                                : "h-full w-full object-cover"}
-                            draggable="false"
-                        />
+                        {#if avatarVisible}
+                            <img
+                                src={avatarSrc}
+                                alt="User Avatar"
+                                class={avatarSrc === fallbackAvatar
+                                    ? "h-7 w-auto"
+                                    : "h-full w-full object-cover"}
+                                draggable="false"
+                            />
+                        {:else}
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="h-6 w-6 text-white/70"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="1.8"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                aria-hidden="true"
+                            >
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                <path d="M12 21a9 9 0 1 1 0 -18a9 9 0 0 1 0 18" />
+                                <path d="M10 10c-.5 -1 -2.5 -1 -3 0" />
+                                <path d="M17 10c-.5 -1 -2.5 -1 -3 0" />
+                                <path d="M14.5 15a3.5 3.5 0 0 1 -5 0" />
+                            </svg>
+                        {/if}
                     </div>
                 </div>
 
@@ -592,16 +689,37 @@
                         My Rhythm
                     </h2>
                     <div
-                        class="h-9 w-9 rounded-full bg-neutral-400 flex items-center justify-center overflow-hidden"
+                        class="h-9 w-9 rounded-full bg-[var(--color-primary-green)] flex items-center justify-center overflow-hidden"
+                        class:bg-neutral-700={!avatarVisible}
                     >
-                        <img
-                            src={avatarSrc}
-                            alt="User Avatar"
-                            class={avatarSrc === fallbackAvatar
-                                ? "h-7 w-auto"
-                                : "h-full w-full object-cover"}
-                            draggable="false"
-                        />
+                        {#if avatarVisible}
+                            <img
+                                src={avatarSrc}
+                                alt="User Avatar"
+                                class={avatarSrc === fallbackAvatar
+                                    ? "h-7 w-auto"
+                                    : "h-full w-full object-cover"}
+                                draggable="false"
+                            />
+                        {:else}
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="h-6 w-6 text-white/70"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="1.8"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                aria-hidden="true"
+                            >
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                <path d="M12 21a9 9 0 1 1 0 -18a9 9 0 0 1 0 18" />
+                                <path d="M10 10c-.5 -1 -2.5 -1 -3 0" />
+                                <path d="M17 10c-.5 -1 -2.5 -1 -3 0" />
+                                <path d="M14.5 15a3.5 3.5 0 0 1 -5 0" />
+                            </svg>
+                        {/if}
                     </div>
                 </div>
 

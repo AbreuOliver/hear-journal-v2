@@ -93,7 +93,9 @@
         </div>
     </div>
     <footer
-        class="mx-auto mb-0 max-w-6xl text-center text-sm text-black/70 py-6 px-6 bg-neutral-200 md:mb-8 md:rounded-[28px] md:border md:border-black/5 md:bg-white/75 md:shadow-sm"
+        class={isPhilosophyPage
+            ? "w-full border-t border-black/5 bg-white px-6 py-8 text-center text-sm text-black/70"
+            : "mx-auto mb-0 max-w-6xl text-center text-sm text-black/70 py-6 px-6 bg-neutral-200 md:mb-8 md:rounded-[28px] md:border md:border-black/5 md:bg-white/75 md:shadow-sm"}
     >
         <p class="text-black/90 font-manrope font-semibold">
             HEAR Journal &copy; {currentYear}
@@ -111,6 +113,14 @@
             It even works offline <span>—</span> everything is saved only on your
             device.
         </p>
+        {#if !isPhilosophyPage}
+            <a
+                href="/philosophy"
+                class="mt-2 inline-flex font-manrope text-xs font-semibold transition text-black/60 hover:text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary-green)] focus-visible:ring-offset-4"
+            >
+                Read the HEAR Journal Philosophy →
+            </a>
+        {/if}
         <a
             href="https://github.com/AbreuOliver"
             target="_blank"

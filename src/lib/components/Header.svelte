@@ -5,6 +5,7 @@
     import { fade, fly, scale } from "svelte/transition";
     import { elasticOut, cubicOut, cubicIn } from "svelte/easing";
     import { browser } from "$app/environment";
+    import { page } from "$app/stores";
     import { trackEvent } from "$lib/utils/analytics";
 
     // ✅ NOT a streak — just cumulative unique days opened
@@ -12,10 +13,13 @@
 
     // ✅ plan days completed (as you already have it)
     $: planDaysCompleted = $engagementMetrics.totalDaysCompleted;
+    $: hideHeaderActions = $page.url.pathname === "/philosophy";
 
     let engagementModalOpen = false;
     let avatarModalOpen = false;
     let avatarVisible = true;
+    let avatarUploading = false;
+    let avatarUploadError = "";
 
     // iOS detection (Safari + iOS PWA)
     let isIOS = false;
@@ -52,12 +56,20 @@
     }
 
     const AVATAR_KEY = "hearjournal.avatar.dataurl";
+    const AVATAR_PREVIEW_KEY = "hearjournal.avatar.preview";
     const AVATAR_VISIBLE_KEY = "hearjournal.avatar.visible";
 
     const fallbackAvatar =
         "https://ik.imagekit.io/bip1v395ybp/oliver-memoji_RMppMBYW_.png?updatedAt=1770330181441";
 
     let avatarSrc: string = fallbackAvatar;
+    let localAvatarPreviewSrc = "";
+    let avatarImageLoadFailed = false;
+
+    $: avatarDisplaySrc =
+        avatarImageLoadFailed && localAvatarPreviewSrc
+            ? localAvatarPreviewSrc
+            : avatarSrc;
 
     function avatarAnalyticsState() {
         return {
@@ -79,9 +91,62 @@
         return "over_2mb";
     }
 
+    async function createAvatarPreview(file: File) {
+        const image = await loadImage(file);
+        const size = 192;
+        const canvas = document.createElement("canvas");
+        canvas.width = size;
+        canvas.height = size;
+
+        const context = canvas.getContext("2d");
+        if (!context) throw new Error("Could not create avatar preview.");
+
+        const sourceSize = Math.min(image.naturalWidth, image.naturalHeight);
+        const sourceX = (image.naturalWidth - sourceSize) / 2;
+        const sourceY = (image.naturalHeight - sourceSize) / 2;
+
+        context.drawImage(
+            image,
+            sourceX,
+            sourceY,
+            sourceSize,
+            sourceSize,
+            0,
+            0,
+            size,
+            size
+        );
+
+        return canvas.toDataURL("image/webp", 0.82);
+    }
+
+    function loadImage(file: File) {
+        return new Promise<HTMLImageElement>((resolve, reject) => {
+            const image = new Image();
+            const url = URL.createObjectURL(file);
+            image.onload = () => {
+                URL.revokeObjectURL(url);
+                resolve(image);
+            };
+            image.onerror = () => {
+                URL.revokeObjectURL(url);
+                reject(new Error("Could not read selected image."));
+            };
+            image.src = url;
+        });
+    }
+
+    function handleAvatarImageError() {
+        if (!localAvatarPreviewSrc || avatarImageLoadFailed) return;
+
+        avatarImageLoadFailed = true;
+        trackEvent("avatar-local-preview-fallback", avatarAnalyticsState());
+    }
+
     onMount(() => {
         const saved = localStorage.getItem(AVATAR_KEY);
         if (saved) avatarSrc = saved;
+        localAvatarPreviewSrc = localStorage.getItem(AVATAR_PREVIEW_KEY) ?? "";
         avatarVisible = localStorage.getItem(AVATAR_VISIBLE_KEY) !== "false";
 
         if (browser) {
@@ -107,6 +172,7 @@
             file_type: file.type || "unknown",
             file_size_bucket: fileSizeBucket(file.size),
         };
+        avatarUploadError = "";
 
         trackEvent("avatar-upload-select", fileData);
 
@@ -115,6 +181,7 @@
                 ...fileData,
                 reason: "not_image",
             });
+            avatarUploadError = "Please choose an image file.";
             input.value = "";
             return;
         }
@@ -123,32 +190,54 @@
                 ...fileData,
                 reason: "too_large",
             });
+            avatarUploadError = "Please choose an image under 2 MB.";
             input.value = "";
             return;
         }
 
-        const dataUrl = await readAsDataUrl(file);
+        avatarUploading = true;
         const previousState = avatarAnalyticsState().avatar_state;
-        avatarSrc = dataUrl;
-        localStorage.setItem(AVATAR_KEY, dataUrl);
 
-        input.value = "";
-        avatarVisible = true;
-        localStorage.setItem(AVATAR_VISIBLE_KEY, "true");
-        avatarModalOpen = false;
-        trackEvent("avatar-upload-success", {
-            ...fileData,
-            previous_avatar_state: previousState,
-            avatar_state: "custom",
-            avatar_visible: true,
-            custom_avatar: true,
-        });
+        try {
+            const localPreview = await createAvatarPreview(file);
+
+            avatarSrc = localPreview;
+            localStorage.setItem(AVATAR_KEY, localPreview);
+            localAvatarPreviewSrc = localPreview;
+            localStorage.setItem(AVATAR_PREVIEW_KEY, localPreview);
+            avatarImageLoadFailed = false;
+            avatarVisible = true;
+            localStorage.setItem(AVATAR_VISIBLE_KEY, "true");
+            avatarModalOpen = false;
+            trackEvent("avatar-upload-success", {
+                ...fileData,
+                previous_avatar_state: previousState,
+                avatar_state: "custom",
+                avatar_visible: true,
+                custom_avatar: true,
+                storage: "local",
+            });
+        } catch (error) {
+            console.error("Avatar upload failed", error);
+            avatarUploadError = "Could not save that image. Please try another one.";
+            trackEvent("avatar-upload-fail", {
+                ...fileData,
+                previous_avatar_state: previousState,
+                reason: error instanceof Error ? error.name : "unknown",
+            });
+        } finally {
+            input.value = "";
+            avatarUploading = false;
+        }
     }
 
     function resetAvatar() {
         const previousState = avatarAnalyticsState().avatar_state;
         localStorage.removeItem(AVATAR_KEY);
+        localStorage.removeItem(AVATAR_PREVIEW_KEY);
         avatarSrc = fallbackAvatar;
+        localAvatarPreviewSrc = "";
+        avatarImageLoadFailed = false;
         avatarVisible = true;
         localStorage.setItem(AVATAR_VISIBLE_KEY, "true");
         trackEvent("avatar-reset", {
@@ -158,6 +247,7 @@
     }
 
     function openAvatarPicker() {
+        avatarUploadError = "";
         trackEvent("avatar-picker-open", avatarAnalyticsState());
         document.getElementById("avatarPicker")?.click();
     }
@@ -184,14 +274,6 @@
         });
     }
 
-    function readAsDataUrl(file: File) {
-        return new Promise<string>((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onerror = () => reject(reader.error);
-            reader.onload = () => resolve(String(reader.result));
-            reader.readAsDataURL(file);
-        });
-    }
 </script>
 
 <svelte:window on:keydown={handleWindowKeydown} />
@@ -202,12 +284,24 @@
     >
         <!-- Title -->
         <h1
-            class="font-manrope text-[1.35rem] md:text-[1.5rem] font-bold text-[var(--color-primary-green)] select-none cursor-default"
+            class="font-manrope text-[1.35rem] md:text-[1.5rem] font-bold text-[var(--color-primary-green)] select-none"
         >
-            <span class="tracking-normal">HEAR</span> Journal
+            {#if hideHeaderActions}
+                <a
+                    href="/"
+                    class="rounded-md transition hover:text-[var(--color-primary-green)]/85 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary-green)] focus-visible:ring-offset-4"
+                >
+                    <span class="tracking-normal">HEAR</span> Journal
+                </a>
+            {:else}
+                <span class="cursor-default">
+                    <span class="tracking-normal">HEAR</span> Journal
+                </span>
+            {/if}
         </h1>
 
         <!-- Right: Days Opened + Avatar -->
+        {#if !hideHeaderActions}
         <div class="ml-auto flex items-center gap-4 md:mr-0 select-none">
             <!-- Engagement Button (clickable) -->
             <button
@@ -262,8 +356,9 @@
                             class="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full"
                         >
                             <img
-                                src={avatarSrc}
+                                src={avatarDisplaySrc}
                                 alt="User Avatar"
+                                on:error={handleAvatarImageError}
                                 class={avatarSrc === fallbackAvatar
                                     ? "h-7 w-auto"
                                     : "h-full w-full object-cover"}
@@ -322,6 +417,7 @@
                 {/if}
             </div>
         </div>
+        {/if}
     </div>
 </header>
 
@@ -365,8 +461,9 @@
                 >
                     {#if avatarVisible}
                         <img
-                            src={avatarSrc}
+                            src={avatarDisplaySrc}
                             alt="User Avatar"
+                            on:error={handleAvatarImageError}
                             class={avatarSrc === fallbackAvatar
                                 ? "h-10 w-auto"
                                 : "h-full w-full object-cover"}
@@ -419,10 +516,11 @@
         <div class="space-y-3">
             <button
                 type="button"
-                class="flex w-full items-center justify-between rounded-2xl bg-white/5 px-4 py-3 text-left font-manrope text-white transition hover:bg-white/10"
+                class="flex w-full items-center justify-between rounded-2xl bg-white/5 px-4 py-3 text-left font-manrope text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
                 on:click={openAvatarPicker}
+                disabled={avatarUploading}
             >
-                <span>Upload picture</span>
+                <span>{avatarUploading ? "Saving…" : "Choose picture"}</span>
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
                     class="h-5 w-5 text-[var(--color-primary-green)]"
@@ -443,8 +541,9 @@
 
             <button
                 type="button"
-                class="flex w-full items-center justify-between rounded-2xl bg-white/5 px-4 py-3 text-left font-manrope text-white transition hover:bg-white/10"
+                class="flex w-full items-center justify-between rounded-2xl bg-white/5 px-4 py-3 text-left font-manrope text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
                 on:click={resetAvatar}
+                disabled={avatarUploading}
             >
                 <span>Reset to default</span>
                 <span class="text-lg leading-none text-white/55">↺</span>
@@ -453,8 +552,9 @@
             {#if avatarVisible}
                 <button
                     type="button"
-                    class="flex w-full items-center justify-between rounded-2xl bg-white/5 px-4 py-3 text-left font-manrope text-white transition hover:bg-white/10"
+                    class="flex w-full items-center justify-between rounded-2xl bg-white/5 px-4 py-3 text-left font-manrope text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
                     on:click={hideAvatar}
+                    disabled={avatarUploading}
                 >
                     <span>Hide avatar</span>
                     <span class="text-white/55">−</span>
@@ -462,8 +562,9 @@
             {:else}
                 <button
                     type="button"
-                    class="flex w-full items-center justify-between rounded-2xl bg-white/5 px-4 py-3 text-left font-manrope text-white transition hover:bg-white/10"
+                    class="flex w-full items-center justify-between rounded-2xl bg-white/5 px-4 py-3 text-left font-manrope text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
                     on:click={showAvatar}
+                    disabled={avatarUploading}
                 >
                     <span>Show avatar</span>
                     <span class="text-[var(--color-primary-green)]">+</span>
@@ -471,10 +572,16 @@
             {/if}
         </div>
 
+        {#if avatarUploadError}
+            <p class="mt-4 rounded-2xl bg-red-500/10 px-4 py-3 text-xs leading-5 text-red-100">
+                {avatarUploadError}
+            </p>
+        {/if}
+
         <p class="mt-5 px-1 text-xs leading-5 text-white/50">
-            Uploaded images stay on this device only. HEAR Journal stores avatar
-            choices locally in your browser and does not save or sync image data
-            to the cloud.
+            Your avatar is saved only on this device in your browser storage.
+            HEAR Journal does not upload, sync, collect, or store personally
+            identifiable information.
         </p>
     </div>
 {/if}
@@ -534,8 +641,9 @@
                     >
                         {#if avatarVisible}
                             <img
-                                src={avatarSrc}
+                                src={avatarDisplaySrc}
                                 alt="User Avatar"
+                                on:error={handleAvatarImageError}
                                 class={avatarSrc === fallbackAvatar
                                     ? "h-7 w-auto"
                                     : "h-full w-full object-cover"}
@@ -694,8 +802,9 @@
                     >
                         {#if avatarVisible}
                             <img
-                                src={avatarSrc}
+                                src={avatarDisplaySrc}
                                 alt="User Avatar"
+                                on:error={handleAvatarImageError}
                                 class={avatarSrc === fallbackAvatar
                                     ? "h-7 w-auto"
                                     : "h-full w-full object-cover"}

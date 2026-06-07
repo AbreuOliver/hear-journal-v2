@@ -4,49 +4,53 @@
 
 /* CUSTOM SANS-SERIF FONT */
 @font-face {
-  font-family: "app-sans";
-  src: url("/fonts/sweet-sans.woff2") format("woff2");
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
+    font-family: "app-sans";
+    src: url("/fonts/sweet-sans.woff2") format("woff2");
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
 }
 
 :root {
-  --color-text-primary: hsl(0, 0%, 13%);
-  --color-text-secondary: hsl(0, 0%, 29%);
-  --color-text-muted: hsl(0, 0%, 60%);
-  --color-primary-green: #82d844;
-  /* --color-primary-green: #ff69b4; */
-  /* --color-primary-green: #007aff; */
+    --color-text-primary: hsl(0, 0%, 13%);
+    --color-text-secondary: hsl(0, 0%, 29%);
+    --color-text-muted: hsl(0, 0%, 60%);
+    --color-primary-green: #82d844;
+    /* --color-primary-green: #ff69b4; */
+    /* --color-primary-green: #007aff; */
 }
 
 .font-manrope {
-  font-family: "Manrope", sans-serif;
+    font-family: "Manrope", sans-serif;
 }
 
 .font-inter {
-  /* font-family: "Inter", sans-serif; */
-  font-family: 'app-sans', sans-serif;
+    /* font-family: "Inter", sans-serif; */
+    font-family: "app-sans", sans-serif;
 }
 
 .text-primary {
-  color: var(--color-primary-green);
+    color: var(--color-primary-green);
 }
 
 html {
-  overscroll-behavior-y: none;
-  height: 100%;
-  margin: 0;
+    overscroll-behavior-y: none;
+    height: 100%;
+    margin: 0;
 }
 
 body {
-  min-height: 100%;
-  margin: 0;
-  background:
-    radial-gradient(circle at top left, rgb(130 216 68 / 0.12), transparent 30rem),
-    linear-gradient(180deg, #ffffff 0%, #f7f7f5 48%, #eeeeeb 100%);
+    min-height: 100%;
+    margin: 0;
+    background:
+        radial-gradient(
+            circle at top left,
+            rgb(130 216 68 / 0.12),
+            transparent 30rem
+        ),
+        linear-gradient(180deg, #ffffff 0%, #f7f7f5 48%, #eeeeeb 100%);
 }
 
 footer p {
-   font-family: "app-sans", sans-serif;
+    font-family: "app-sans", sans-serif;
 }

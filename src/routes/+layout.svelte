@@ -116,9 +116,9 @@
         {#if !isPhilosophyPage}
             <a
                 href="/philosophy"
-                class="mt-2 inline-flex font-manrope text-xs font-semibold transition text-black/60 hover:text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary-green)] focus-visible:ring-offset-4"
+                class="mx-auto mt-2 flex w-fit font-manrope text-xs font-semibold transition text-black/60 hover:text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary-green)] focus-visible:ring-offset-4"
             >
-                Read the HEAR Journal Philosophy →
+                Our philosophy →
             </a>
         {/if}
         <a
